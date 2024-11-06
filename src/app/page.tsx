@@ -1,30 +1,20 @@
-"use client";
+import HistoryTesla from "@/components/history-tesla";
+import { Card } from "@/components/ui/card";
+import UserButton from "@/components/user-button";
+import { getCurrent } from "@/features/auth/action";
+import { useHistoricalPriceByMonth } from "@/features/invest-tracker/api/use-historical-price-by-month";
+import { redirect } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { useCurrent } from "@/features/auth/api/use-current";
-import { useLogout } from "@/features/auth/api/use-logout";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+export default async function Home() {
+  const user = await getCurrent();
+  if (!user) redirect("/login");
 
-import { LuLogOut } from "react-icons/lu";
-
-export default function Home() {
-  const router = useRouter();
-  const { data, isLoading } = useCurrent();
-  const { mutate } = useLogout();
-
-  useEffect(() => {
-    if (!data && !isLoading) {
-      router.push("/login");
-    }
-  }, [data]);
+  const teslaHistory = await useHistoricalPriceByMonth();
 
   return (
     <div>
-      <Button onClick={() => mutate()}>
-        <LuLogOut />
-        Logout
-      </Button>
+      <UserButton />
+      <HistoryTesla data={teslaHistory} />
     </div>
   );
 }

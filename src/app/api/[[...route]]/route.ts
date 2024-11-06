@@ -1,10 +1,12 @@
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import auth from "@/features/auth/server/route";
+import investTracker from "@/features/invest-tracker/server/route";
+import template from "@/features/template/server/route";
 
 const app = new Hono().basePath("/api");
 
-const routes = app.route("/auth", auth);
+const routes = app.route("/auth", auth).route("/invest-tracker", investTracker);
 
 // app.get("/hello", (c) => {
 //   return c.json({ hello: "world" });

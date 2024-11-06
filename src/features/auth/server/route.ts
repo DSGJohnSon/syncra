@@ -30,8 +30,7 @@ const app = new Hono()
         maxAge: 60 * 60 * 24 * 30,
       });
     } catch (error) {
-      console.log(error);
-      return c.json({ error: error });
+      throw error;
     }
 
     return c.json({ success: true });
@@ -39,20 +38,24 @@ const app = new Hono()
   .post("/register", zValidator("json", registerSchema), async (c) => {
     const { name, email, password } = await c.req.json();
 
-    const { account } = await createAdminClient();
-    await account.create(ID.unique(), email, password, name);
+    try {
+      const { account } = await createAdminClient();
+      await account.create(ID.unique(), email, password, name);
 
-    const session = await account.createEmailPasswordSession(email, password);
+      const session = await account.createEmailPasswordSession(email, password);
 
-    setCookie(c, AUTH_COOKIE, session.secret, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 30,
-    });
+      setCookie(c, AUTH_COOKIE, session.secret, {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 30,
+      });
 
-    return c.json({ success: true });
+      return c.json({ success: true });
+    } catch (error) {
+      throw error;
+    }
   })
   .post("/logout", sessionMiddleware, async (c) => {
     const account = c.get("account");
